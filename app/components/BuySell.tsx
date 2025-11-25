@@ -47,6 +47,7 @@ const BuySell = ({ market }: { market: string }) => {
     if (!currentUser || !db) return;
 
     const loadUserData = async () => {
+      if (!db) return;
       try {
         // Load wallet balance
         const userDoc = await getDoc(doc(db, "users", currentUser.uid));
@@ -72,7 +73,7 @@ const BuySell = ({ market }: { market: string }) => {
     };
 
     loadUserData();
-  }, [currentUser, base, db]);
+  }, [currentUser, base]);
 
   // Get current market price
   useEffect(() => {
@@ -132,6 +133,11 @@ const BuySell = ({ market }: { market: string }) => {
     }
 
     const totalCost = buyPrice * buyAmount;
+
+    if (!db) {
+      alert("Firebase is not configured");
+      return;
+    }
 
     try {
       // Check wallet balance
@@ -252,6 +258,11 @@ const BuySell = ({ market }: { market: string }) => {
       setLoading(true);
 
       const totalValue = sellPrice * sellAmount;
+
+      if (!db) {
+        alert("Firebase is not configured");
+        return;
+      }
 
       // Update wallet balance
       const userDoc = await getDoc(doc(db, "users", currentUser.uid));

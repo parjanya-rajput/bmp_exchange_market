@@ -9,7 +9,6 @@ import {
     setDoc,
     updateDoc,
     collection,
-    addDoc,
     getDocs,
     query,
     where,
@@ -47,13 +46,6 @@ export default function ProfilePage() {
     const [profileExists, setProfileExists] = useState(false);
     const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
     const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({});
-    const [showAddCrypto, setShowAddCrypto] = useState(false);
-    const [newCrypto, setNewCrypto] = useState({
-        currency: "",
-        quantity: 0,
-        purchasePrice: 0,
-        currentPrice: 0,
-    });
     const [addMoneyAmount, setAddMoneyAmount] = useState("");
 
     useEffect(() => {
@@ -265,35 +257,6 @@ export default function ProfilePage() {
         } catch (error) {
             console.error("Error saving profile:", error);
             alert("Error saving profile");
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handleAddCrypto = async () => {
-        if (!currentUser) return;
-
-        if (!db) {
-            alert("Firebase is not configured. Please set up your environment variables.");
-            return;
-        }
-
-        try {
-            setSaving(true);
-            await addDoc(collection(db, "portfolio"), {
-                userId: currentUser.uid,
-                currency: newCrypto.currency,
-                quantity: newCrypto.quantity,
-                purchasePrice: newCrypto.purchasePrice,
-                currentPrice: newCrypto.currentPrice,
-                createdAt: new Date(),
-            });
-            setNewCrypto({ currency: "", quantity: 0, purchasePrice: 0, currentPrice: 0 });
-            setShowAddCrypto(false);
-            loadUserData();
-        } catch (error) {
-            console.error("Error adding crypto:", error);
-            alert("Error adding crypto");
         } finally {
             setSaving(false);
         }
