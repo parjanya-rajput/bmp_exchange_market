@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - users can only read/write their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Portfolio collection - users can only access their own portfolio items
+    match /portfolio/{portfolioId} {
+      // For queries and individual reads, check if userId matches
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // For writes, check userId in the data
+      allow write: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+  }
+}
+
