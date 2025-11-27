@@ -9,8 +9,10 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login, signup, currentUser } = useAuth();
+  const { login, signup, currentUser, sendPasswordReset } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +24,7 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setInfoMessage("");
     setLoading(true);
 
     try {
@@ -30,12 +33,31 @@ export default function AuthPage() {
         router.push("/");
       } else {
         await signup(email, password);
+        setInfoMessage("Verification email sent. Please verify before trading.");
         router.push("/profile");
       }
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Enter your email to reset password");
+      return;
+    }
+    try {
+      setError("");
+      setInfoMessage("");
+      setResetLoading(true);
+      await sendPasswordReset(email);
+      setInfoMessage("Password reset email sent. Please check your inbox.");
+    } catch (err: any) {
+      setError(err.message || "Failed to send reset email");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -81,6 +103,11 @@ export default function AuthPage() {
             {error}
           </div>
         )}
+        {infoMessage && (
+          <div className="mb-4 p-3 bg-[#1D2D2D] text-[#00C26A] rounded text-sm">
+            {infoMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col gap-1">
@@ -107,6 +134,16 @@ export default function AuthPage() {
               placeholder="Enter your password"
             />
           </div>
+          {isLogin && (
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={resetLoading || loading}
+              className="text-xs text-[#00C26A] hover:text-[#00a95c] transition self-end"
+            >
+              {resetLoading ? "Sending reset link..." : "Forgot password?"}
+            </button>
+          )}
 
           <button
             type="submit"

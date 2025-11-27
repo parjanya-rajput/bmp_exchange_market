@@ -7,6 +7,9 @@ import {
     createUserWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
+    sendEmailVerification,
+    sendPasswordResetEmail,
+    reload,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
 
@@ -15,6 +18,9 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<any>;
     signup: (email: string, password: string) => Promise<any>;
     logout: () => Promise<void>;
+    sendPasswordReset: (email: string) => Promise<void>;
+    sendVerificationEmail: () => Promise<void>;
+    refreshUser: () => Promise<User | null>;
     loading: boolean;
 }
 
@@ -33,11 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const [firebaseError, setFirebaseError] = useState<string | null>(null);
 
-    function signup(email: string, password: string) {
+    async function signup(email: string, password: string) {
         if (!auth) {
             throw new Error("Firebase is not initialized. Please check your environment variables.");
         }
-        return createUserWithEmailAndPassword(auth, email, password);
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        if (credential.user) {
+            await sendEmailVerification(credential.user);
+        }
+        return credential;
     }
 
     function login(email: string, password: string) {
@@ -52,6 +62,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             throw new Error("Firebase is not initialized. Please check your environment variables.");
         }
         return signOut(auth);
+    }
+
+    function sendPasswordReset(email: string) {
+        if (!auth) {
+            throw new Error("Firebase is not initialized. Please check your environment variables.");
+        }
+        return sendPasswordResetEmail(auth, email);
+    }
+
+    async function sendVerificationEmail() {
+        if (!auth || !auth.currentUser) {
+            throw new Error("No authenticated user to verify.");
+        }
+        await sendEmailVerification(auth.currentUser);
+    }
+
+    async function refreshUser() {
+        if (!auth || !auth.currentUser) return null;
+        await reload(auth.currentUser);
+        setCurrentUser({ ...auth.currentUser });
+        return auth.currentUser;
     }
 
     useEffect(() => {
@@ -81,6 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         logout,
+        sendPasswordReset,
+        sendVerificationEmail,
+        refreshUser,
         loading,
     };
 

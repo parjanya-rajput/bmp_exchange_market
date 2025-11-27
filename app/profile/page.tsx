@@ -33,7 +33,7 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-    const { currentUser, logout } = useAuth();
+    const { currentUser, logout, sendVerificationEmail, refreshUser } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -47,6 +47,9 @@ export default function ProfilePage() {
     const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
     const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({});
     const [addMoneyAmount, setAddMoneyAmount] = useState("");
+    const [verificationMessage, setVerificationMessage] = useState("");
+    const [verificationLoading, setVerificationLoading] = useState(false);
+    const isEmailVerified = currentUser?.emailVerified ?? false;
 
     useEffect(() => {
         if (!currentUser) {
@@ -264,6 +267,10 @@ export default function ProfilePage() {
 
     const handleAddMoney = async () => {
         if (!currentUser) return;
+        if (!isEmailVerified) {
+            alert("Please verify your email before adding funds to your wallet.");
+            return;
+        }
 
         if (!db) {
             alert("Firebase is not configured. Please set up your environment variables.");
@@ -293,6 +300,63 @@ export default function ProfilePage() {
             setSaving(false);
         }
     };
+
+    const handleResendVerification = async () => {
+        if (!currentUser) return;
+        try {
+            setVerificationLoading(true);
+            setVerificationMessage("");
+            await sendVerificationEmail();
+            setVerificationMessage("Verification email sent. Please check your inbox.");
+        } catch (error: any) {
+            setVerificationMessage(error.message || "Failed to send verification email.");
+        } finally {
+            setVerificationLoading(false);
+        }
+    };
+
+    const handleRefreshVerificationStatus = async () => {
+        try {
+            setVerificationLoading(true);
+            setVerificationMessage("");
+            const updated = await refreshUser();
+            if (updated?.emailVerified) {
+                setVerificationMessage("Email verified! You now have access to wallet and trading.");
+            } else {
+                setVerificationMessage("Verification still pending. Click resend to get a new link.");
+            }
+        } catch (error: any) {
+            setVerificationMessage(error.message || "Failed to refresh verification status.");
+        } finally {
+            setVerificationLoading(false);
+        }
+    };
+
+    const VerificationBanner = () =>
+        currentUser && !isEmailVerified ? (
+            <div className="bg-[#382429] border border-[#DD3129]/40 text-[#F5A524] p-4 rounded mb-6 text-sm">
+                <p className="font-semibold mb-2">Verify your email to unlock trading and wallet features.</p>
+                <div className="flex flex-wrap gap-3 text-xs">
+                    <button
+                        onClick={handleResendVerification}
+                        disabled={verificationLoading}
+                        className="px-3 py-1 rounded bg-[#DD3129] text-white hover:bg-[#b72822] disabled:opacity-50"
+                    >
+                        {verificationLoading ? "Processing..." : "Resend verification email"}
+                    </button>
+                    <button
+                        onClick={handleRefreshVerificationStatus}
+                        disabled={verificationLoading}
+                        className="px-3 py-1 rounded border border-[#F5A524] text-[#F5A524] hover:bg-[#F5A524]/10 disabled:opacity-50"
+                    >
+                        I have verified
+                    </button>
+                </div>
+                {verificationMessage && (
+                    <p className="mt-2 text-xs text-white">{verificationMessage}</p>
+                )}
+            </div>
+        ) : null;
 
     const handleLogout = async () => {
         try {
@@ -326,6 +390,8 @@ export default function ProfilePage() {
                             Sign Out
                         </button>
                     </div>
+
+                    <VerificationBanner />
 
                     {/* Create Profile Form */}
                     <div className="bg-[#14151B] rounded-lg border border-slate-800 p-8">
@@ -412,6 +478,8 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
+                <VerificationBanner />
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Profile Information */}
                     <div className="bg-[#14151B] rounded-lg border border-slate-800 p-6">
@@ -492,12 +560,17 @@ export default function ProfilePage() {
                                     />
                                     <button
                                         onClick={handleAddMoney}
-                                        disabled={saving}
+                                        disabled={saving || !isEmailVerified}
                                         className="px-4 py-2 bg-[#00C26A] text-white rounded hover:bg-[#00a95c] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                     >
                                         Add
                                     </button>
                                 </div>
+                                {!isEmailVerified && (
+                                    <p className="text-xs text-[#F5A524] mt-2">
+                                        Verify your email to add funds to your wallet.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
