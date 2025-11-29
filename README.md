@@ -2,7 +2,7 @@
 
 A real-time cryptocurrency exchange frontend built with **Next.js**, **TypeScript**, **WebSockets**, and **Lightweight Charts**, inspired by modern trading platforms like Binance and Backpack.
 
-🚀 **Live Website**: [https://mybackpack-gold.vercel.app/](https://mybackpack-gold.vercel.app/)
+🚀 **Live Website**: [https://crypto-exchange-rouge-five.vercel.app/](https://crypto-exchange-rouge-five.vercel.app/)
 
 ---
 
