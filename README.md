@@ -35,12 +35,13 @@ A real-time cryptocurrency exchange frontend built with **Next.js**, **TypeScrip
 ## 🧩 Project Structure
 
 app/
-├── components/ # All UI components like Chart, OrderBook, Trades, MarketBar
-├── contexts/ # AuthContext for Firebase authentication
-├── utils/ # ChartManager, ConnectionManager, Firebase config, type definitions
-├── api/klines/route.ts # Server-side proxy for fetching kline data
-├── auth/ # Login and signup page
-├── profile/ # User profile, portfolio, and wallet management
+   ├── components/ # All UI components like Chart, OrderBook, Trades, MarketBar
+   ├── contexts/ # AuthContext for Firebase authentication
+   ├── utils/ # ChartManager, ConnectionManager, Firebase config, type definitions
+   ├── api/klines/route.ts # Server-side proxy for fetching kline data
+   ├── auth/ # Login and signup page
+   ├── profile/ # User profile, portfolio, and wallet management
+   
 public/ # Static assets
 styles/ # Global styles
 
@@ -84,7 +85,7 @@ styles/ # Global styles
 ## 🌐 Deployment
 This project is deployed on Vercel:
 
-🔗 Production URL: https://mybackpack-gold.vercel.app/
+🔗 Production URL: https://crypto-exchange-rouge-five.vercel.app/
 
 ## CORS Note
 The /api/v1/klines endpoint on Backpack Exchange has CORS restrictions. This project uses a server-side route (/api/klines) in Next.js to safely proxy requests.
