@@ -101,8 +101,3 @@ The /api/v1/klines endpoint on Backpack Exchange has CORS restrictions. This pro
   - Current price
   - Profit & Loss calculations
 - **Wallet Balance**: Dummy wallet system with ability to add funds
-
-## ⚠️ Known Limitations
-The Swap UI is for demonstration only and does not perform real trades.
-
-Wallet balance is a dummy implementation for demonstration purposes.
